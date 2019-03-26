@@ -24,6 +24,8 @@ import static android.location.LocationProvider.OUT_OF_SERVICE;
 
 public class MainActivity extends AppCompatActivity {
 
+    String TAG = "GPS";
+
     LocationManager locationManager = null;
     private String fournisseur;
     private TextView latitude;
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     LocationListener ecouteurGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location localisation) {
+            Log.d(TAG,"On location changed");
+
             Toast.makeText(MainActivity.this, fournisseur + " localisation", Toast.LENGTH_SHORT).show();
 
             Log.d("GPS", "localisation : " + localisation.toString());
@@ -101,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("GPS", "OnCreate");
+        Log.d(TAG, "OnCreate");
 
         initialiserLocalisation();
     }
@@ -123,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initialiserLocalisation() {
+        Log.d(TAG, "On initialiserLocalisation");
+
         if(locationManager==null){
             locationManager = (LocationManager)
                     MainActivity.this.getSystemService(Context.LOCATION_SERVICE);
@@ -133,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             criteres.setPowerRequirement(Criteria.POWER_HIGH); // consommation d'énergie autorisée
             fournisseur = locationManager.getBestProvider(criteres, true);
 
-            Log.d("GPS", "fournisseur"+fournisseur);
+            Log.d("GPS", "fournisseur "+fournisseur);
         }
 
         if (fournisseur != null){
