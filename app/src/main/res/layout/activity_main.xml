@@ -57,7 +57,7 @@
 
         </LinearLayout>
 
-        <ImageView
+        <!--<ImageView
             android:contentDescription="Prenez une photo pour ouvrir la porte"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
             android:layout_marginBottom="50dp"
             android:id="@+id/PhotoImage"
             android:focusable="true"
-            android:clickable="true"/>
+            android:clickable="true"/>-->
 
         <TextView
             android:id="@+id/latitude"
