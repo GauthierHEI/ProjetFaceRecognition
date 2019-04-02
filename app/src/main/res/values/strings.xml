@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ProjetS8</string>
-    <string name="description">HEI Unlock est une application qui vous permet d\'ouvrir les portes de HEI avec son visage ! Il suffit d\'enregistrer son matricule et de prendre une photo de votre visage quand vous voulez ouvrir la porte la plus proche de vous. \n \n</string>
+    <string name="app_name">HEI Unlock</string>
+    <string name="description">Ouvre les portes d\'HEI avec ton visage ! Entre ton matricule et prend toi en photo pour ouvrir la porte la plus proche !</string>
     <string name="hint">Entrez votre matricule</string>
 </resources>
