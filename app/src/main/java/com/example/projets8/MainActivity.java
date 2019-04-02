@@ -3,6 +3,7 @@ package com.example.projets8;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,8 +18,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+//import java.util.Collections;
+import java.util.Collections;
 import java.util.Date;
 
 import static android.location.LocationProvider.OUT_OF_SERVICE;
@@ -29,17 +34,17 @@ public class MainActivity extends AppCompatActivity {
 
     private double latitudeTelphone;
     private double longitudeTelephone;
+    private int nombrePortes;
     private ArrayList<Porte> portes;
     private ArrayList<Double> distanceToPortes;
+    private int porteProche;
 
     LocationManager locationManager = null;
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
     private Button button;
-    private TextView distancePorteEntreeTextView;
-    private TextView distancePorteDerriereTextView;
-    private TextView distanceSalleClasseTextView;
+    private ArrayList<TextView> distancePortesTextViews;
 
     LocationListener ecouteurGPS = new LocationListener() {
         @Override
@@ -66,6 +71,26 @@ public class MainActivity extends AppCompatActivity {
             String strLongitude = String.format("Longitude : %f", localisation.getLongitude());
             latitudeTextView.setText(strLatitude);
             longitudeTextView.setText(strLongitude);
+
+            distancesPorte(localisation);
+
+            porteProche = choixPorte();
+            if (distanceToPortes.get(porteProche) < 10){
+                for (int i=0; i< nombrePortes; i++) {
+                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                }
+                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
+                button.setEnabled(true);
+                Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
+            }
+            else {
+                for (int i=0; i< nombrePortes; i++) {
+                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                }
+                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
+                button.setEnabled(false);
+                Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
@@ -106,10 +131,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(TAG, "OnCreate");
+
+        nombrePortes = 3;
         portes = new ArrayList<Porte>();
-        portes.add(new Porte("porteEntree", 50.633792d,3.044914d));
-        portes.add(new Porte("porteDerriere", 50.633187d,3.046571d));
-        portes.add(new Porte("salleDeClasse", 50.631919d, 3.041823d));
+        portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
+        portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
+        portes.add(new Porte("Salle de classe", new Location(fournisseur)));
+
+        portes.get(0).getLocation().setLatitude(50.633769d);
+        portes.get(0).getLocation().setLongitude(3.045075d);
+        portes.get(1).getLocation().setLatitude(50.633297d);
+        portes.get(1).getLocation().setLongitude(3.045993d);
+        portes.get(2).getLocation().setLatitude(50.634005d);
+        portes.get(2).getLocation().setLongitude(3.045535d);
 
         setContentView(R.layout.activity_main);
         latitudeTextView = findViewById(R.id.latitude);
@@ -123,17 +158,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Log.d(TAG, "OnCreate");
+        distancePortesTextViews = new ArrayList<TextView>();
 
-        initialiserLocalisation();
-
-        distancePorteEntreeTextView = findViewById(R.id.distancePorteEntree);
-        distancePorteDerriereTextView = findViewById(R.id.distancePorteDerriere);
-        distanceSalleClasseTextView = findViewById(R.id.distanceSalleClasse);
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
 
         distanceToPortes = new ArrayList<Double>();
-        distancesPorte();
 
+        initialiserLocalisation();
     }
 
     @Override
@@ -184,41 +217,34 @@ public class MainActivity extends AppCompatActivity {
                 ecouteurGPS.onLocationChanged(localisation); //notification de la localisation
             }
 
-            locationManager.requestLocationUpdates(fournisseur, 10000, 0, ecouteurGPS);
-            //Mise à jour de la position automatiquement ( au moins 10m et 15s )
+            locationManager.requestLocationUpdates(fournisseur, 2000, 0, ecouteurGPS);
+            //Mise à jour de la position automatiquement ( au moins 10s et 0m )
 
         }
     }
 
-    private void distancesPorte() {
+    private void distancesPorte(Location location) {
         // A noter que les portes sont dans l'ordre suivant :
         // 0- Porte d'entre
         // 1- Porte de derriere
         // 2- Salle de classe <-> Test
 
-        Location phonePosition = new Location("position Telephone");
-        phonePosition.setLatitude(latitudeTelphone);
-        phonePosition.setLongitude(longitudeTelephone);
+        distanceToPortes = new ArrayList<>();
 
-        Location frontDoorPosition = new Location("position porte entree");
-        frontDoorPosition.setLatitude(portes.get(0).getLatitude());
-        frontDoorPosition.setLongitude(portes.get(0).getLongitude());
+        distanceToPortes.add((double) location.distanceTo(portes.get(0).getLocation()));
+        Log.d("DISTANCE", "DISTANCE "+distanceToPortes.get(0).toString());
+        distanceToPortes.add((double) location.distanceTo(portes.get(1).getLocation()));
+        distanceToPortes.add((double) location.distanceTo(portes.get(2).getLocation()));
 
-        Location backDoorPosition = new Location("position porte derriere");
-        backDoorPosition.setLatitude(portes.get(1).getLatitude());
-        backDoorPosition.setLongitude(portes.get(1).getLongitude());
+        distancePortesTextViews.get(0).setText(distanceToPortes.get(0).toString());
+        distancePortesTextViews.get(1).setText(distanceToPortes.get(1).toString());
+        distancePortesTextViews.get(2).setText(distanceToPortes.get(2).toString());
+    }
 
-        Location classroomPosition = new Location("position salle de classe");
-        classroomPosition.setLatitude(portes.get(2).getLatitude());
-        classroomPosition.setLongitude(portes.get(2).getLongitude());
-
-        distanceToPortes.add((double) phonePosition.distanceTo(frontDoorPosition));
-        distanceToPortes.add((double) phonePosition.distanceTo(backDoorPosition));
-        distanceToPortes.add((double) phonePosition.distanceTo(classroomPosition));
-
-        distancePorteEntreeTextView.setText(distanceToPortes.get(0).toString());
-        distancePorteDerriereTextView.setText(distanceToPortes.get(1).toString());
-        distanceSalleClasseTextView.setText(distanceToPortes.get(2).toString());
+    private int choixPorte() {
+        int porte;
+        porte = distanceToPortes.indexOf(Collections.min(distanceToPortes));
+        return porte;
     }
 
 }

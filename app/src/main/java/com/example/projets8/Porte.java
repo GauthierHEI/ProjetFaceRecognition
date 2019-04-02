@@ -1,28 +1,30 @@
 package com.example.projets8;
 
+import android.location.Location;
+
 import java.util.ArrayList;
 
 public class Porte {
 
     private String name;
-    private double latitude;
-    private double longitude;
+    private Location location;
 
-    public Porte(String name, double latitude, double longitude) {
+    public Porte(String name) {
         this.name = name;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    }
+
+    public Porte(String name, Location location) {
+        this.name = name;
+        this.location = location;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
+    public Location getLocation() { return location; }
 
-    public double getLongitude() {
-        return longitude;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }
