@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:layout_marginBottom="25dp"
-            android:justificationMode="inter_word"
+            android:textAlignment="center"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:text="@string/description" />
@@ -50,7 +50,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="10dp"
-                android:autofillHints="@string/hint"
                 android:hint="@string/hint" />
 
             <Button
