@@ -3,6 +3,7 @@ package com.example.projets8;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,25 +18,44 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import static android.location.LocationProvider.OUT_OF_SERVICE;
 
 public class MainActivity extends AppCompatActivity {
 
+    String TAG = "GPS";
+
+    private double latitudeTelphone;
+    private double longitudeTelephone;
+    private int nombrePortes;
+    private ArrayList<Porte> portes;
+    private ArrayList<Double> distanceToPortes;
+    private int porteProche;
+
     LocationManager locationManager = null;
     private String fournisseur;
-    private TextView latitude;
-    private TextView longitude;
+    private TextView latitudeTextView;
+    private TextView longitudeTextView;
     private Button button;
+    private ArrayList<TextView> distancePortesTextViews;
 
     LocationListener ecouteurGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location localisation) {
+            Log.d(TAG,"On location changed");
+
             Toast.makeText(MainActivity.this, fournisseur + " localisation", Toast.LENGTH_SHORT).show();
 
             Log.d("GPS", "localisation : " + localisation.toString());
+
+            latitudeTelphone = localisation.getLatitude();
+            longitudeTelephone = localisation.getLongitude();
             String coordonnees = String.format("Latitude : %f - Longitude : %f\n", localisation.getLatitude(), localisation.getLongitude());
             Log.d("GPS", coordonnees);
             String autres = String.format("Vitesse : %f - Altitude : %f - Cap : %f\n", localisation.getSpeed(), localisation.getAltitude(), localisation.getBearing());
@@ -48,8 +68,28 @@ public class MainActivity extends AppCompatActivity {
 
             String strLatitude = String.format("Latitude : %f", localisation.getLatitude());
             String strLongitude = String.format("Longitude : %f", localisation.getLongitude());
-            latitude.setText(strLatitude);
-            longitude.setText(strLongitude);
+            latitudeTextView.setText(strLatitude);
+            longitudeTextView.setText(strLongitude);
+
+            distancesPorte(localisation);
+
+            porteProche = choixPorte();
+            if (distanceToPortes.get(porteProche) < 10){
+                for (int i=0; i< nombrePortes; i++) {
+                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                }
+                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
+                button.setEnabled(true);
+                Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
+            }
+            else {
+                for (int i=0; i< nombrePortes; i++) {
+                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                }
+                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
+                button.setEnabled(false);
+                Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
@@ -89,9 +129,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "OnCreate");
+
+        nombrePortes = 3;
+        portes = new ArrayList<Porte>();
+        portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
+        portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
+        portes.add(new Porte("Salle de classe", new Location(fournisseur)));
+
+        portes.get(0).getLocation().setLatitude(50.633769d);
+        portes.get(0).getLocation().setLongitude(3.045075d);
+        portes.get(1).getLocation().setLatitude(50.633297d);
+        portes.get(1).getLocation().setLongitude(3.045993d);
+        portes.get(2).getLocation().setLatitude(50.634005d);
+        portes.get(2).getLocation().setLongitude(3.045535d);
+
         setContentView(R.layout.activity_main);
-        latitude = findViewById(R.id.latitude);
-        longitude = findViewById(R.id.longitude);
+        latitudeTextView = findViewById(R.id.latitude);
+        longitudeTextView = findViewById(R.id.longitude);
         button = findViewById(R.id.ButtonTest);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -101,7 +157,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("GPS", "OnCreate");
+        distancePortesTextViews = new ArrayList<TextView>();
+
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
+
+        distanceToPortes = new ArrayList<Double>();
 
         initialiserLocalisation();
     }
@@ -123,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initialiserLocalisation() {
+        Log.d(TAG, "On initialiserLocalisation");
+
         if(locationManager==null){
             locationManager = (LocationManager)
                     MainActivity.this.getSystemService(Context.LOCATION_SERVICE);
@@ -133,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             criteres.setPowerRequirement(Criteria.POWER_HIGH); // consommation d'énergie autorisée
             fournisseur = locationManager.getBestProvider(criteres, true);
 
-            Log.d("GPS", "fournisseur"+fournisseur);
+            Log.d("GPS", "fournisseur "+fournisseur);
         }
 
         if (fournisseur != null){
@@ -152,9 +216,34 @@ public class MainActivity extends AppCompatActivity {
                 ecouteurGPS.onLocationChanged(localisation); //notification de la localisation
             }
 
-            locationManager.requestLocationUpdates(fournisseur, 10000, 0, ecouteurGPS);
-            //Mise à jour de la position automatiquement ( au moins 10m et 15s )
+            locationManager.requestLocationUpdates(fournisseur, 2000, 0, ecouteurGPS);
+            //Mise à jour de la position automatiquement ( au moins 10s et 0m )
 
         }
     }
+
+    private void distancesPorte(Location location) {
+        // A noter que les portes sont dans l'ordre suivant :
+        // 0- Porte d'entre
+        // 1- Porte de derriere
+        // 2- Salle de classe <-> Test
+
+        distanceToPortes = new ArrayList<>();
+
+        distanceToPortes.add((double) location.distanceTo(portes.get(0).getLocation()));
+        Log.d("DISTANCE", "DISTANCE "+distanceToPortes.get(0).toString());
+        distanceToPortes.add((double) location.distanceTo(portes.get(1).getLocation()));
+        distanceToPortes.add((double) location.distanceTo(portes.get(2).getLocation()));
+
+        distancePortesTextViews.get(0).setText(distanceToPortes.get(0).toString());
+        distancePortesTextViews.get(1).setText(distanceToPortes.get(1).toString());
+        distancePortesTextViews.get(2).setText(distanceToPortes.get(2).toString());
+    }
+
+    private int choixPorte() {
+        int porte;
+        porte = distanceToPortes.indexOf(Collections.min(distanceToPortes));
+        return porte;
+    }
+
 }
