@@ -2,6 +2,7 @@ package com.example.projets8;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -29,6 +30,8 @@ import static android.location.LocationProvider.OUT_OF_SERVICE;
 
 public class MainActivity extends AppCompatActivity {
 
+    Button button;
+
     String TAG = "GPS";
 
     private double latitudeTelphone;
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
-    private Button button;
+    private Button but;
     private ArrayList<TextView> distancePortesTextViews;
 
     LocationListener ecouteurGPS = new LocationListener() {
@@ -165,7 +168,21 @@ public class MainActivity extends AppCompatActivity {
 
         distanceToPortes = new ArrayList<Double>();
 
+        but=(Button)findViewById(R.id.submit);
+        but.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Intent intent = new Intent(MainActivity.this, FaceRecon.class);
+                startActivity(intent);
+            }
+        });
+
+
         initialiserLocalisation();
+
+
     }
 
     @Override
