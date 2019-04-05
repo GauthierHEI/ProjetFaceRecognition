@@ -176,6 +176,24 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //ADD CODE HERE
+
+            }
+        });
+
+        distancePortesTextViews = new ArrayList<TextView>();
+
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
+
+        distanceToPortes = new ArrayList<Double>();
+
+        but=(Button)findViewById(R.id.submit);
+        but.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
                 if (distanceToPortes.get(porteProche) < 20){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
@@ -197,25 +215,6 @@ public class MainActivity extends AppCompatActivity {
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
                     Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-
-        distancePortesTextViews = new ArrayList<TextView>();
-
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
-
-        distanceToPortes = new ArrayList<Double>();
-
-        but=(Button)findViewById(R.id.submit);
-        but.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                Intent intent = new Intent(MainActivity.this, FaceRecon.class);
-                startActivity(intent);
             }
         });
 
