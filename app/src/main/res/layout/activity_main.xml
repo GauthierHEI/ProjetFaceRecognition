@@ -17,13 +17,11 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <TextView
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="HEI Unlock"
-           android:textSize="@android:dimen/notification_large_icon_width"
-           android:textStyle="bold"
-           android:textColor="@color/colorPrimary"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/title_red"
+            android:layout_margin="20dp" />
 
         <TextView
             android:layout_width="match_parent"
