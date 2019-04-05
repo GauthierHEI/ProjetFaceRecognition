@@ -170,17 +170,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 nombrePortes = portes.size();
                 Log.d("Pierre",portes.toString());
-                onDataReceived();
             }
         });
 
-
-
-
-
-    }
-
-    private void onDataReceived(){
         /*portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
         portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
         portes.add(new Porte("Salle de classe", new Location(fournisseur)));
