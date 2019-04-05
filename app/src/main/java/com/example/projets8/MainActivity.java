@@ -12,8 +12,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
-    private Button button;
+    private Button Test;
+    private Button Submit;
     private TextView distancePorteEntreeTextView;
     private TextView distancePorteDerriereTextView;
     private TextView distanceSalleClasseTextView;
@@ -105,18 +109,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        final EditText editMatricule =  findViewById(R.id.matricule);
+        final TextView result = findViewById(R.id.tvResult);
+        Submit = findViewById(R.id.submit);
+        Submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String matricule = editMatricule.getText().toString();
+                if (matricule.equals("")) {
+                    result.setText("Veuillez entrer un matricule valide");
+                }
+                else {
+                    result.setText("Matricule:\t" + matricule);
+                }
+            }
+        });
 
         portes = new ArrayList<Porte>();
         portes.add(new Porte("porteEntree", 50.633792d,3.044914d));
         portes.add(new Porte("porteDerriere", 50.633187d,3.046571d));
         portes.add(new Porte("salleDeClasse", 50.631919d, 3.041823d));
 
-        setContentView(R.layout.activity_main);
         latitudeTextView = findViewById(R.id.latitude);
         longitudeTextView = findViewById(R.id.longitude);
-        button = findViewById(R.id.ButtonTest);
+        Test = findViewById(R.id.ButtonTest);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        Test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "Test de géolocalisation", Toast.LENGTH_LONG).show();
