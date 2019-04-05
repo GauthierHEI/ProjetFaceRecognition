@@ -150,7 +150,9 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
 
-        Query query = ref.orderBy("note",Query.Direction.DESCENDING);
+        Query query = ref.orderBy("id",Query.Direction.DESCENDING);
+
+        Log.d("Porte", query.toString());
 
 
         Log.d(TAG, "OnCreate");
@@ -204,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent i = new Intent(MainActivity.this, FaceRecon.class);
                     Bundle porteBundle = new Bundle();
                     porteBundle.putInt("intPorte", porteProche);
+                    porteBundle.putString("nomPorte", portes.get(porteProche).getName());
                     i.putExtras(porteBundle);
 
                     startActivity(i);
