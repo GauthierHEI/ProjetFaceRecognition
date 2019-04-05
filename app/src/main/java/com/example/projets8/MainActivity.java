@@ -19,6 +19,14 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import org.json.JSONArray;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
     String TAG = "GPS";
 
-    /*FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference ref = db.collection("PositionsPorte");
     private static final String COMMA_DELIMITER = ",";
     JSONArray jsonArray = new JSONArray();
-    private FirebaseAuth mAuth;*/
+    private FirebaseAuth mAuth;
 
     private double latitudeTelphone;
     private double longitudeTelephone;
@@ -78,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
             porteProche = choixPorte();
 
-            if (distanceToPortes.get(porteProche) < 10){
+            if (distanceToPortes.get(porteProche) < 20){
                 for (int i=0; i< nombrePortes; i++) {
                     distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                 }
@@ -137,11 +145,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*FirebaseApp.initializeApp(this);
+        FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
 
         Query query = ref.orderBy("note",Query.Direction.DESCENDING);
-        */
+
 
         Log.d(TAG, "OnCreate");
 
@@ -166,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (distanceToPortes.get(porteProche) < 10){
+                if (distanceToPortes.get(porteProche) < 20){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
