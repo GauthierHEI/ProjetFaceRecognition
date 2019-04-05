@@ -9,27 +9,37 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import org.json.JSONArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import static android.location.LocationProvider.OUT_OF_SERVICE;
-
 public class MainActivity extends AppCompatActivity {
 
     String TAG = "GPS";
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference ref = db.collection("PositionsPorte");
+    private static final String COMMA_DELIMITER = ",";
+    JSONArray jsonArray = new JSONArray();
+    private FirebaseAuth mAuth;
 
     private double latitudeTelphone;
     private double longitudeTelephone;
@@ -74,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             distancesPorte(localisation);
 
             porteProche = choixPorte();
+
             if (distanceToPortes.get(porteProche) < 10){
                 for (int i=0; i< nombrePortes; i++) {
                     distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
@@ -129,6 +140,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseApp.initializeApp(this);
+        mAuth = FirebaseAuth.getInstance();
+
+        Query query = ref.orderBy("note",Query.Direction.DESCENDING);
+
 
         Log.d(TAG, "OnCreate");
 

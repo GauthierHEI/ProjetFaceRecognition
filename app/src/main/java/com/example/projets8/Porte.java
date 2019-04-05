@@ -2,8 +2,6 @@ package com.example.projets8;
 
 import android.location.Location;
 
-import java.util.ArrayList;
-
 public class Porte {
 
     private String name;
@@ -23,8 +21,4 @@ public class Porte {
     }
 
     public Location getLocation() { return location; }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
 }
