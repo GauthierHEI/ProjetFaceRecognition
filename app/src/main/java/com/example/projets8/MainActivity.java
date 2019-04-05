@@ -2,6 +2,7 @@ package com.example.projets8;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -9,27 +10,39 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import org.json.JSONArray;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import static android.location.LocationProvider.OUT_OF_SERVICE;
-
 public class MainActivity extends AppCompatActivity {
 
+    Button button;
+
     String TAG = "GPS";
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference ref = db.collection("PositionsPorte");
+    private static final String COMMA_DELIMITER = ",";
+    JSONArray jsonArray = new JSONArray();
+    private FirebaseAuth mAuth;
 
     private double latitudeTelphone;
     private double longitudeTelephone;
@@ -42,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
-    private Button button;
+    private Button but;
     private ArrayList<TextView> distancePortesTextViews;
 
     LocationListener ecouteurGPS = new LocationListener() {
@@ -50,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         public void onLocationChanged(Location localisation) {
             Log.d(TAG,"On location changed");
 
-            Toast.makeText(MainActivity.this, fournisseur + " localisation", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, fournisseur + " localisation", Toast.LENGTH_SHORT).show();
 
             Log.d("GPS", "localisation : " + localisation.toString());
 
@@ -74,21 +87,18 @@ public class MainActivity extends AppCompatActivity {
             distancesPorte(localisation);
 
             porteProche = choixPorte();
-            if (distanceToPortes.get(porteProche) < 10){
+
+            if (distanceToPortes.get(porteProche) < 20){
                 for (int i=0; i< nombrePortes; i++) {
                     distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                 }
                 distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
-                button.setEnabled(true);
-                Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
             }
             else {
                 for (int i=0; i< nombrePortes; i++) {
                     distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                 }
                 distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
-                button.setEnabled(false);
-                Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -97,31 +107,38 @@ public class MainActivity extends AppCompatActivity {
             switch(status){
                 case LocationProvider
                         .AVAILABLE:
-                    Toast.makeText(MainActivity.this, fournisseur + "état disponible!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, fournisseur + "état disponible!", Toast.LENGTH_SHORT).show();
+                    Log.d("GPS", fournisseur + " état disponible!");
                     break;
                 case LocationProvider
                         .OUT_OF_SERVICE:
-                    Toast.makeText(MainActivity.this, fournisseur + "état indisponible!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, fournisseur + "état indisponible!", Toast.LENGTH_SHORT).show();
+                    Log.d("GPS", fournisseur + " état indisponible!");
                     break;
                 case LocationProvider
                         .TEMPORARILY_UNAVAILABLE:
-                    Toast.makeText(MainActivity.this, fournisseur + "état temporairement indisponible !", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, fournisseur + "état temporairement indisponible !", Toast.LENGTH_SHORT).show();
+                    Log.d("GPS", fournisseur + " état temporairement indisponible!");
                     break;
+
                 default:
-                    Toast.makeText(MainActivity.this, fournisseur + "état : "+ status, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, fournisseur + "état : "+ status, Toast.LENGTH_SHORT).show();
+                    Log.d("GPS", fournisseur + "état : "+ status);
             }
 
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Toast.makeText(MainActivity.this, fournisseur + "activé !", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, fournisseur + "activé !", Toast.LENGTH_SHORT).show();
+            Log.d("GPS", fournisseur+ " activé !");
 
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Toast.makeText(MainActivity.this, fournisseur + "désactivé !", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, fournisseur + " désactivé !", Toast.LENGTH_SHORT).show();
+            Log.d("GPS", fournisseur+ " désactivé !");
         }
     };
 
@@ -129,6 +146,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseApp.initializeApp(this);
+        mAuth = FirebaseAuth.getInstance();
+
+        Query query = ref.orderBy("id",Query.Direction.DESCENDING);
+
+        Log.d("Porte", query.toString());
+
 
         Log.d(TAG, "OnCreate");
 
@@ -148,12 +173,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         latitudeTextView = findViewById(R.id.latitude);
         longitudeTextView = findViewById(R.id.longitude);
-        button = findViewById(R.id.ButtonTest);
 
+        button = findViewById(R.id.ButtonTest);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Test de géolocalisation", Toast.LENGTH_LONG).show();
+                //ADD CODE HERE
+
             }
         });
 
@@ -165,7 +191,40 @@ public class MainActivity extends AppCompatActivity {
 
         distanceToPortes = new ArrayList<Double>();
 
+        but=(Button)findViewById(R.id.submit);
+        but.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (distanceToPortes.get(porteProche) < 20){
+                    for (int i=0; i< nombrePortes; i++) {
+                        distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                    }
+                    distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
+                    Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
+
+                    Intent i = new Intent(MainActivity.this, FaceRecon.class);
+                    Bundle porteBundle = new Bundle();
+                    porteBundle.putInt("intPorte", porteProche);
+                    porteBundle.putString("nomPorte", portes.get(porteProche).getName());
+                    i.putExtras(porteBundle);
+
+                    startActivity(i);
+                }
+                else {
+                    for (int i=0; i< nombrePortes; i++) {
+                        distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                    }
+                    distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
+                    Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
         initialiserLocalisation();
+
+
     }
 
     @Override
