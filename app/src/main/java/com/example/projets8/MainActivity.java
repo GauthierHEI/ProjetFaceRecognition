@@ -16,14 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import org.json.JSONArray;
 
@@ -33,8 +32,6 @@ import java.util.Collections;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-
-    Button button;
 
     String TAG = "GPS";
 
@@ -55,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
-    private Button but;
+    Button submit;
+    Button test;
     private ArrayList<TextView> distancePortesTextViews;
 
     LocationListener ecouteurGPS = new LocationListener() {
@@ -146,56 +144,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        FirebaseApp.initializeApp(this);
-        mAuth = FirebaseAuth.getInstance();
-
-        Query query = ref.orderBy("id",Query.Direction.DESCENDING);
-
-        Log.d("Porte", query.toString());
-
-
+        setContentView(R.layout.activity_main);
         Log.d(TAG, "OnCreate");
 
-        nombrePortes = 3;
-        portes = new ArrayList<Porte>();
-        portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
-        portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
-        portes.add(new Porte("Salle de classe", new Location(fournisseur)));
 
-        portes.get(0).getLocation().setLatitude(50.633769d);
-        portes.get(0).getLocation().setLongitude(3.045075d);
-        portes.get(1).getLocation().setLatitude(50.633297d);
-        portes.get(1).getLocation().setLongitude(3.045993d);
-        portes.get(2).getLocation().setLatitude(50.634005d);
-        portes.get(2).getLocation().setLongitude(3.045535d);
+        final EditText editMatricule =  findViewById(R.id.matricule);
+        final TextView result = findViewById(R.id.tvResult);
 
-        setContentView(R.layout.activity_main);
-        latitudeTextView = findViewById(R.id.latitude);
-        longitudeTextView = findViewById(R.id.longitude);
-
-        button = findViewById(R.id.ButtonTest);
-        button.setOnClickListener(new View.OnClickListener() {
+        submit = (Button) findViewById(R.id.submit);
+        Log.d("TAGuele", submit.toString());
+        submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //ADD CODE HERE
+                String matricule = editMatricule.getText().toString();
+                if (matricule.equals("")) {
+                    result.setText("Veuillez entrer un matricule valide");
+                }
+                else {
+                    result.setText("Matricule:\t" + matricule);
+                }
 
-            }
-        });
-
-        distancePortesTextViews = new ArrayList<TextView>();
-
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
-
-        distanceToPortes = new ArrayList<Double>();
-
-        but=(Button)findViewById(R.id.submit);
-        but.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
+                // CHANGE ACTIVITY
                 if (distanceToPortes.get(porteProche) < 20){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
@@ -221,10 +190,62 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        portes = new ArrayList<Porte>();
+        /*ref =db.collection("PositionsPorte");
+        ref.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                for (DocumentSnapshot document : task.getResult()) {
+
+                    Log.d("Pierre", document.getString("nom"));
+                    GeoPoint point = document.getGeoPoint("location");
+                    Porte porte = new Porte(document.getString("nom"),new Location(fournisseur));
+
+                    Log.d("Pierre", ((GeoPoint) point).toString());
+                    porte.getLocation().setLatitude(point.getLatitude());
+                    porte.getLocation().setLongitude(point.getLongitude());
+                    portes.add(porte);
+                }
+                nombrePortes = portes.size();
+
+            }
+        });
+
+        Log.d("Pierre",portes.toString());*/
+
+        portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
+        portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
+        portes.add(new Porte("Salle de classe", new Location(fournisseur)));
+
+        portes.get(0).getLocation().setLatitude(50.633769d);
+        portes.get(0).getLocation().setLongitude(3.045075d);
+        portes.get(1).getLocation().setLatitude(50.633297d);
+        portes.get(1).getLocation().setLongitude(3.045993d);
+        portes.get(2).getLocation().setLatitude(50.634005d);
+        portes.get(2).getLocation().setLongitude(3.045535d);
+
+        latitudeTextView = findViewById(R.id.latitude);
+        longitudeTextView = findViewById(R.id.longitude);
+
+        test = findViewById(R.id.ButtonTest);
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ADD CODE HERE
+
+            }
+        });
+
+        distancePortesTextViews = new ArrayList<TextView>();
+
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
+
+        distanceToPortes = new ArrayList<Double>();
+
 
         initialiserLocalisation();
-
-
     }
 
     @Override
@@ -288,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
         // 2- Salle de classe <-> Test
 
         distanceToPortes = new ArrayList<>();
+
 
         distanceToPortes.add((double) location.distanceTo(portes.get(0).getLocation()));
         Log.d("DISTANCE", "DISTANCE "+distanceToPortes.get(0).toString());
