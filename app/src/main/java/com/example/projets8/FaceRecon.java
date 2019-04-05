@@ -1,18 +1,20 @@
 package com.example.projets8;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.Manifest;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -30,6 +32,9 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +55,7 @@ public class FaceRecon extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_facerecon);
         mPreview = (CameraSurfacePreview) findViewById(R.id.preview);
         cameraOverlay = (CameraOverlay) findViewById(R.id.faceOverlay);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -231,8 +236,10 @@ public class FaceRecon extends AppCompatActivity {
             mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
                 @Override
                 public void onPictureTaken(byte[] bytes) {
-                    final Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        /*Log.d("Pierre", bmp.getWidth() + "x" + bmp.getHeight());
+                        final Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        final File file = new File(Environment.getExternalStorageDirectory().getPath()+"/toto4.png");
+                        final FileOutputStream[] filecon = {null};
+                        Log.d("Pierre", bmp.getWidth() + "x" + bmp.getHeight());
                         try {
                             filecon[0] = new FileOutputStream(file);
                             bmp.compress(Bitmap.CompressFormat.JPEG, 90, filecon[0]);
@@ -241,14 +248,14 @@ public class FaceRecon extends AppCompatActivity {
                             e.printStackTrace();
                             Log.d("Pierre",e.getMessage());
                         }
-                        if(filecon[0] !=null) {
+                    if(filecon[0] !=null) {
                             try {
                                 filecon[0].close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Log.d("Pierre",e.getMessage());
                             }
-                        }*/
+                        }
 
 
                     RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
