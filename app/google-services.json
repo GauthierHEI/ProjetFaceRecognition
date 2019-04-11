@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "915684844252",
+    "firebase_url": "https://heiunlock.firebaseio.com",
+    "project_id": "heiunlock",
+    "storage_bucket": "heiunlock.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915684844252:android:a2567df1c0933b48",
+        "android_client_info": {
+          "package_name": "com.example.projets8"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "915684844252-fg89rvlgiqrc4nlg0re7uri2a42b9g5u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.projets8",
+            "certificate_hash": "227a4edc378f69635f544fd74da826aed85d4db7"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDF8dmTRKgRO2pI51_i8HZuFOkVUquuNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "915684844252-fafluqv5htpb8g3td0sgqpb6vua2ptjm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915684844252:android:f680cac9102a5bfe",
+        "android_client_info": {
+          "package_name": "com.heiUnlock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDF8dmTRKgRO2pI51_i8HZuFOkVUquuNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "915684844252-fafluqv5htpb8g3td0sgqpb6vua2ptjm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
