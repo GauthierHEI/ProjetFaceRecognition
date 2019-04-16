@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText editMatricule = findViewById(R.id.matricule);
         final TextView result = findViewById(R.id.tvResult);
 
-        submit = findViewById(R.id.submit);
+        submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -177,10 +177,6 @@ public class MainActivity extends AppCompatActivity {
 
                 String savedMatricule = sharedPreferences.getString("matricule", null);
                 editMatricule.setText(savedMatricule);
-
-
-
-
 
                 // CHANGE ACTIVITY
                 if (porteProche==null) {
