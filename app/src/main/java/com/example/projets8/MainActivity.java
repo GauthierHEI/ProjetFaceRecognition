@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -146,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         FirebaseApp.initializeApp(this);
+
         mAuth = FirebaseAuth.getInstance();
 
         Query query = ref.orderBy("id",Query.Direction.DESCENDING);
@@ -174,14 +176,7 @@ public class MainActivity extends AppCompatActivity {
         latitudeTextView = findViewById(R.id.latitude);
         longitudeTextView = findViewById(R.id.longitude);
 
-        button = findViewById(R.id.ButtonTest);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //ADD CODE HERE
 
-            }
-        });
 
         distancePortesTextViews = new ArrayList<TextView>();
 
@@ -305,4 +300,9 @@ public class MainActivity extends AppCompatActivity {
         return porte;
     }
 
+    private void changeAccesPorte() {
+        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("porte").child("porte1");
+        databaseReference.setValue(true);
+        Toast.makeText(this, "Changement effectué", Toast.LENGTH_SHORT).show();
+    }
 }

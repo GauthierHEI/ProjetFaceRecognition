@@ -1,8 +1,8 @@
 package com.example.projets8;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
@@ -31,10 +31,10 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,12 +50,23 @@ public class FaceRecon extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int RC_HANDLE_WRITE_PERM = 3;
+    private int bundlePorte;
+    private DatabaseReference mDatabase;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_facerecon);
+
+
+        //RealTimeDatabase
+        mDatabase= FirebaseDatabase.getInstance().getReference("porte");
+        Intent i=getIntent();
+        Bundle bundle=getIntent().getExtras();
+        bundlePorte=bundle.getInt("intPorte");
+
+
+        setContentView(R.layout.activity_main);
         mPreview = (CameraSurfacePreview) findViewById(R.id.preview);
         cameraOverlay = (CameraOverlay) findViewById(R.id.faceOverlay);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -70,6 +81,19 @@ public class FaceRecon extends AppCompatActivity {
         } else {
             Log.d("Pierre","Need to request");
             requestWritePermission();
+        }
+    }
+    private void changeOuverturePorte(){
+        if (bundlePorte==0){
+            mDatabase.child("porte1").setValue(true);
+        }
+        if(bundlePorte==1){
+            mDatabase.child("porte2").setValue(true);
+        }
+        if(bundlePorte==-1){
+            mDatabase.child("porte1").setValue(false);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
         }
     }
 
@@ -236,10 +260,8 @@ public class FaceRecon extends AppCompatActivity {
             mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
                 @Override
                 public void onPictureTaken(byte[] bytes) {
-                        final Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        final File file = new File(Environment.getExternalStorageDirectory().getPath()+"/toto4.png");
-                        final FileOutputStream[] filecon = {null};
-                        Log.d("Pierre", bmp.getWidth() + "x" + bmp.getHeight());
+                    final Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        /*Log.d("Pierre", bmp.getWidth() + "x" + bmp.getHeight());
                         try {
                             filecon[0] = new FileOutputStream(file);
                             bmp.compress(Bitmap.CompressFormat.JPEG, 90, filecon[0]);
@@ -248,14 +270,14 @@ public class FaceRecon extends AppCompatActivity {
                             e.printStackTrace();
                             Log.d("Pierre",e.getMessage());
                         }
-                    if(filecon[0] !=null) {
+                        if(filecon[0] !=null) {
                             try {
                                 filecon[0].close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 Log.d("Pierre",e.getMessage());
                             }
-                        }
+                        }*/
 
 
                     RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
@@ -341,3 +363,4 @@ public class FaceRecon extends AppCompatActivity {
     }
 
 }
+
