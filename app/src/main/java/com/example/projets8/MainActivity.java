@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,8 +34,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    //Permissions
+    String[] appPermissions = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+
+    };
+    private static final int PERMISSIONS_REQUEST_CODE=1240;
+
+
 
     Button button;
 
@@ -144,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
+//ON CREATE//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         Log.d(TAG, "OnCreate");
+        if(checkAncRequestPermissions()){
+
+        }
 
         nombrePortes = 3;
         portes = new ArrayList<Porte>();
@@ -304,5 +322,21 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("porte").child("porte1");
         databaseReference.setValue(true);
         Toast.makeText(this, "Changement effectué", Toast.LENGTH_SHORT).show();
+    }
+
+    public boolean checkAncRequestPermissions(){
+        List<String> listPermissionsNeeded= new ArrayList<>();
+        for (String perm : appPermissions){
+            if (ContextCompat.checkSelfPermission(this,perm)!= PackageManager.PERMISSION_GRANTED){
+                listPermissionsNeeded.add(perm);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()){
+            ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray(new String [listPermissionsNeeded.size()]),
+                    PERMISSIONS_REQUEST_CODE);
+            return false;
+        }
+        return true;
     }
 }

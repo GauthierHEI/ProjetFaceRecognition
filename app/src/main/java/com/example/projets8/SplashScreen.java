@@ -1,12 +1,21 @@
 package com.example.projets8;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
+import com.google.api.Backend;
 import com.google.firebase.FirebaseApp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SplashScreen extends Activity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,6 +23,9 @@ public class SplashScreen extends Activity {
         // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash);
+
+
+
 
         Thread timerThread = new Thread(){
             public void run(){
@@ -30,11 +42,15 @@ public class SplashScreen extends Activity {
         timerThread.start();
     }
 
+
+
     @Override
     protected void onPause() {
         // TODO Auto-generated method stub
         super.onPause();
         finish();
     }
+
+
 
 }
