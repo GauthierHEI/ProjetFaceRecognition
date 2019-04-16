@@ -86,9 +86,13 @@ public class FaceRecon extends AppCompatActivity {
     private void changeOuverturePorte(){
         if (bundlePorte==0){
             mDatabase.child("porte1").setValue(true);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
         }
         if(bundlePorte==1){
+            mDatabase.child("porte1").setValue(false);
             mDatabase.child("porte2").setValue(true);
+            mDatabase.child("porte3").setValue(false);
         }
         if(bundlePorte==-1){
             mDatabase.child("porte1").setValue(false);
