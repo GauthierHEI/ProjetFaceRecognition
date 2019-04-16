@@ -2,4 +2,7 @@
     <string name="app_name">HEI Unlock</string>
     <string name="description">Ouvre les portes d\'HEI avec ton visage ! Entre ton matricule et prends-toi en photo pour ouvrir la porte la plus proche !</string>
     <string name="hint">Matricule</string>
+    <string name="hintLogin">Entrez votre login</string>
+    <string name="hintMdp">Entrez votre mdp</string>
+    <string name="AdminLink"><u>Je suis administrateur</u></string>
 </resources>

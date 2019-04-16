@@ -1,31 +1,45 @@
 package com.example.projets8;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AdminActivity extends AppCompatActivity{
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+public class AdminActivity extends AppCompatActivity {
 
     private TextView LoginTextView;
     private TextView PasswordTextView;
     private Button AuthentificationButton;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference ref = db.collection("Administrateurs");
 
-    @Override
-    public void OnCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState){
 
-        super.onCreate( savedInstanceState);
+        super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_admin);
-        LoginTextView = findViewById(R.id.login);
-        PasswordTextView = findViewById(R.id.password);
-        AuthentificationButton = findViewById(R.id.ButtonLogin);
+        setContentView(R.layout.admin_activity);
+        LoginTextView = findViewById(R.id.Login);
+        PasswordTextView = findViewById(R.id.Password);
+        AuthentificationButton = findViewById(R.id.ButtonAuthentification);
 
         AuthentificationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(AdminActivity.this, "Authentification à faire", Toast.LENGTH_LONG).show();
+
+                String login = LoginTextView.getText().toString();
+                String mdp = PasswordTextView.getText().toString();
+
+                if (login != "" && mdp != ""){
+                    ref.document("login");
+                }else{
+                    Toast.makeText(AdminActivity.this, "Champs mal remplis", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
 
