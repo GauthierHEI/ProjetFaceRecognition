@@ -21,6 +21,26 @@
             "package_name": "com.example.projets8",
             "certificate_hash": "227a4edc378f69635f544fd74da826aed85d4db7"
           }
+        },
+        {
+          "client_id": "915684844252-rmd6fih4qg3u8c9cfnd11h2ga2jrj60u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.projets8",
+            "certificate_hash": "3022c3529d5cd8da3ce510f5c25b69b9156b96de"
+          }
+        },
+        {
+          "client_id": "915684844252-tb89qmdcl4soip53r92jfbqa55uf5b8q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.projets8",
+            "certificate_hash": "eaff9d5c6851e928097611509154156fc4ba5d74"
+          }
+        },
+        {
+          "client_id": "915684844252-fafluqv5htpb8g3td0sgqpb6vua2ptjm.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -46,7 +66,20 @@
           "package_name": "com.heiUnlock"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "915684844252-leagdo4dfjjdougvfh9sbkmug9fe023b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.heiUnlock",
+            "certificate_hash": "227a4edc378f69635f544fd74da826aed85d4db7"
+          }
+        },
+        {
+          "client_id": "915684844252-fafluqv5htpb8g3td0sgqpb6vua2ptjm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBDF8dmTRKgRO2pI51_i8HZuFOkVUquuNQ"

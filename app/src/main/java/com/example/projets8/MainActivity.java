@@ -3,6 +3,7 @@ package com.example.projets8;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -11,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -30,6 +32,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+
+import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     Button submit;
     Button test;
     private ArrayList<TextView> distancePortesTextViews;
+
+    SharedPreferences sharedPreferences;
 
     LocationListener ecouteurGPS = new LocationListener() {
         @Override
@@ -152,22 +158,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(ACTIVITY_TAG, "OnCreate");
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
-
-        final EditText editMatricule =  findViewById(R.id.matricule);
+        final EditText editMatricule = findViewById(R.id.matricule);
         final TextView result = findViewById(R.id.tvResult);
 
         submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 String matricule = editMatricule.getText().toString();
-                if (matricule.equals("")) {
-                    result.setText("Veuillez entrer un matricule valide");
-                }
-                else {
-                    result.setText("Matricule:\t" + matricule);
-                }
+                sharedPreferences
+                        .edit()
+                        .putString("matricule", matricule)
+                        .apply();
+                Toast.makeText(MainActivity.this, "Sauvegardé !", Toast.LENGTH_SHORT).show();
+
+                String savedMatricule = sharedPreferences.getString("matricule", null);
+                editMatricule.setText(savedMatricule);
 
                 // CHANGE ACTIVITY
                 if (porteProche==null) {
@@ -243,6 +252,15 @@ public class MainActivity extends AppCompatActivity {
         distanceToPortes = new ArrayList<Double>();
 
         initialiserLocalisation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final EditText editMatricule = findViewById(R.id.matricule);
+        String savedMatricule = sharedPreferences.getString("matricule", null);
+        editMatricule.setText(savedMatricule);
+
     }
 
     @Override
