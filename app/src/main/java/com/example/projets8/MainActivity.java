@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 // CHANGE ACTIVITY
-                /*if (distanceToPortes.get(porteProche) < 20){
+                if (distanceToPortes.get(porteProche) < 20000){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
                     Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
-                }*/
+                }
             }
         });
 
@@ -233,8 +234,8 @@ public class MainActivity extends AppCompatActivity {
         portes.get(0).getLocation().setLongitude(3.045075d);
         portes.get(1).getLocation().setLatitude(50.633297d);
         portes.get(1).getLocation().setLongitude(3.045993d);
-        portes.get(2).getLocation().setLatitude(50.634005d);
-        portes.get(2).getLocation().setLongitude(3.045535d);
+        portes.get(2).getLocation().setLatitude(50.633689d);
+        portes.get(2).getLocation().setLongitude(3.045395d);
 
         latitudeTextView = findViewById(R.id.latitude);
         longitudeTextView = findViewById(R.id.longitude);
