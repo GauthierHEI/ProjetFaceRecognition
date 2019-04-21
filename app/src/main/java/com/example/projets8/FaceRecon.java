@@ -404,6 +404,4 @@ public class FaceRecon extends AppCompatActivity {
             }
         });
     }
-
-
 }

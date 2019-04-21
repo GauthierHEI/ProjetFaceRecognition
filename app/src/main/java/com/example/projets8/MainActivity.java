@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Toast.makeText(MainActivity.this, "Impossible de récupérer la position des portes", Toast.LENGTH_LONG).show();
                 }
-                else if( distanceToPortes.get(porteProche) < 20){
+                else if( distanceToPortes.get(porteProche) < 2000){
 
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
                     Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
