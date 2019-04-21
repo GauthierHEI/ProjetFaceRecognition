@@ -1,5 +1,6 @@
 package com.example.projets8;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,14 +40,16 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -63,6 +67,9 @@ public class FaceRecon extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int RC_HANDLE_WRITE_PERM = 3;
+    SharedPreferences sharedPreferences;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +80,8 @@ public class FaceRecon extends AppCompatActivity {
         mPreview = (CameraSurfacePreview) findViewById(R.id.preview);
         cameraOverlay = (CameraOverlay) findViewById(R.id.faceOverlay);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
+
         if (rc == PackageManager.PERMISSION_GRANTED) {
             createCameraSource();
         } else {
@@ -348,55 +357,103 @@ public class FaceRecon extends AppCompatActivity {
                     final String image_url = downloadUri.toString();
                     Log.d("Pierre",image_url);
 
-                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
-                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
-                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                            new Response.Listener<String>()
-                            {
-                                @Override
-                                public void onResponse(String response) {
-                                    // response
-                                    Log.d("Pierre", response);
-                                    deleteImage(mountainImagesRef);
+                    sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
+                    Log.d("Pierre", sharedPreferences.getString("matricule", null));
+
+                    String savedMatricule = sharedPreferences.getString("matricule", null);
+
+
+                    DocumentReference docRef = db.collection("Target").document(savedMatricule);
+                    docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d("Pierre", "DocumentSnapshot data: " + document.getString("visage"));
+                                    final String img_check = document.getString("visage");
+                                    Log.d("Pierre", img_check);
+
+                                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
+
+                                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
+                                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                                            new Response.Listener<String>()
+                                            {
+                                                @Override
+                                                public void onResponse(String response) {
+                                                    // response
+                                                    Log.d("Pierre", response);
+                                                    deleteImage(mountainImagesRef);
+                                                }
+                                            },
+                                            new Response.ErrorListener()
+                                            {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    // error
+                                                    Log.d("Pierre", error.toString());
+                                                    deleteImage(mountainImagesRef);
+                                                }
+                                            }
+                                    ) {
+                                        @Override
+                                        protected Map<String, String> getParams()
+                                        {
+
+                                            String savedMatricule = sharedPreferences.getString("matricule", null);
+                                            DocumentReference docRef = db.collection("Target").document(savedMatricule);
+                                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
+                                                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                                        } else {
+                                                            Log.d(TAG, "No such document");
+                                                        }
+                                                    } else {
+                                                        Log.d(TAG, "get failed with ", task.getException());
+                                                    }
+                                                }
+                                            });
+
+
+                                            Log.d("Pierre", "get Params");
+                                            Map<String, String>  params = new HashMap<>();
+                                            params.put("img_1", image_url);
+
+                                            params.put("img_2", img_check);
+                                            return params;
+                                        }
+
+                                        // Passing some request headers
+                                        @Override
+                                        public Map getHeaders() {
+                                            Log.d("Pierre", "get Header");
+                                            HashMap headers = new HashMap();
+                                            headers.put("user_id", "3cd031bea84b5097c384");
+                                            headers.put("user_key", "085fbb614106a1b414c5");
+                                            return headers;
+                                        }
+                                    };
+
+                                    postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                            30000,
+                                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                    queue.add(postRequest);
+
+                                } else {
+                                    Log.d(TAG, "No such document");
                                 }
-                            },
-                            new Response.ErrorListener()
-                            {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    // error
-                                    Log.d("Pierre", error.getMessage());
-                                    deleteImage(mountainImagesRef);
-                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
                             }
-                    ) {
-                        @Override
-                        protected Map<String, String> getParams()
-                        {
-                            Log.d("Pierre", "get Params");
-                            Map<String, String>  params = new HashMap<>();
-                            params.put("img_1", image_url);
-                            params.put("img_2", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7rxyUdhH_jvgUXGDcsb_KP5Si4uBHmRD5M39h2pTAiPEcB27v5w");
-                            return params;
                         }
-
-                        // Passing some request headers
-                        @Override
-                        public Map getHeaders() {
-                            Log.d("Pierre", "get Header");
-                            HashMap headers = new HashMap();
-                            headers.put("user_id", "3cd031bea84b5097c384");
-                            headers.put("user_key", "085fbb614106a1b414c5");
-                            return headers;
-                        }
-                    };
-                    Log.d("Pierre", "prePost");
-
-                    queue.add(postRequest);
-
-                    Log.d("Pierre", "posPost");
-
-
+                    });
 
                 } else {
                     Log.d("Pierre", "Failed");
