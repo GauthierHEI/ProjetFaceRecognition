@@ -39,6 +39,15 @@
           }
         },
         {
+          "client_id": "915684844252-bgja3g44qg3tr9tlnon7pblh9p5qjqvp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.projets8",
+            "certificate_hash": "f5bf3753ec4b4a0d1d2d4652dcb6286f84aba151"
+          }
+        },
+        {
+
           "client_id": "915684844252-fafluqv5htpb8g3td0sgqpb6vua2ptjm.apps.googleusercontent.com",
           "client_type": 3
         }

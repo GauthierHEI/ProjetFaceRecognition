@@ -176,11 +176,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Log.d(ACTIVITY_TAG, "OnCreate");
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
         final EditText editMatricule = findViewById(R.id.matricule);
+
         final TextView result = findViewById(R.id.tvResult);
+        final TextView admin = findViewById(R.id.LinkToAdmin);
 
         submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
@@ -225,6 +228,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_LONG).show();
                 }
             }
+
+
         });
 
         final Bundle extras = getIntent().getExtras();
@@ -363,6 +368,15 @@ public class MainActivity extends AppCompatActivity {
         return porte;
     }
 
+
+    public void AdminLink(View v){
+
+        Log.d("Admin", "In Admin");
+        Intent i = new Intent(MainActivity.this, AdminActivity.class);
+        startActivity(i);
+    }
+
+
     private void changeAccesPorte() {
         DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("porte").child("porte1");
         databaseReference.setValue(true);
@@ -385,3 +399,4 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 }
+

@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="25dp"
             android:background="@drawable/border"
             android:gravity="center"
             android:orientation="horizontal">
@@ -107,6 +107,16 @@
             android:background="@color/colorPrimary"
             android:text="Test"
             android:textColor="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/LinkToAdmin"
+            android:text="@string/AdminLink"
+            android:textColor="@color/colorLink"
+            android:clickable="true"
+            android:onClick="AdminLink"
+            android:focusable="true" />
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
