@@ -3,6 +3,7 @@ package com.example.projets8;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -146,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "OnCreate");
-
 
         final EditText editMatricule =  findViewById(R.id.matricule);
         final TextView result = findViewById(R.id.tvResult);

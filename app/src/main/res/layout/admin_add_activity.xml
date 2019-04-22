@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:text="Administrator"
             android:textColor="@color/colorPrimary"
             android:textSize="@android:dimen/notification_large_icon_width"
@@ -31,45 +31,51 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/border"
             android:orientation="horizontal"
             android:gravity="center">
 
             <EditText
-                android:id="@+id/Login"
+                android:id="@+id/NewMatricule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hintLogin" />
+                android:hint="@string/hintMatricule"/>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/ButtonEnregistrement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:text="Enregistrer" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginBottom="100dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/border"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:gravity="center">
 
-            <EditText
-                android:id="@+id/Password"
+            <ImageView
+                android:id="@+id/ChosenImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Showing the image chosen by the admin" />
+
+            <Button
+                android:id="@+id/ChooseImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="@string/hintMdp" />
+                android:text="@string/hintPhoto"/>
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/ButtonAuthentification"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:textColor="@android:color/white"
-            android:text="Authentification" />
 
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

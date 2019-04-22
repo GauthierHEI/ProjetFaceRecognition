@@ -4,5 +4,7 @@
     <string name="hint">Matricule</string>
     <string name="hintLogin">Entrez votre login</string>
     <string name="hintMdp">Entrez votre mdp</string>
+    <string name="hintMatricule">Entrez le matricule</string>
+    <string name="hintPhoto">Choisir une photo</string>
     <string name="AdminLink"><u>Je suis administrateur</u></string>
 </resources>
