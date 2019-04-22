@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-//ON CREATE//
+    //ON CREATE//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,13 +180,24 @@ public class MainActivity extends AppCompatActivity {
         Log.d(ACTIVITY_TAG, "OnCreate");
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
+
+
+        if (checkAncRequestPermissions() == true){
+            Log.d("Pierre", "Vrai");
+        } else {
+            Log.d("Pierre", "Faux");
+        }
+
         final EditText editMatricule = findViewById(R.id.matricule);
 
         final TextView result = findViewById(R.id.tvResult);
         final TextView admin = findViewById(R.id.LinkToAdmin);
 
+
+
         submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
+
 
             @Override
             public void onClick(View v) {
@@ -242,30 +253,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Impossible de récupérer la position des portes", Toast.LENGTH_LONG).show();
         }
 
-        /*portes.add(new Porte("Porte d'entree"));
-        portes.add(new Porte("Porte de derriere"));
-        portes.add(new Porte("Salle de classe"));
-
-        portes.get(0).setLatitude(50.633769d);
-        portes.get(0).setLongitude(3.045075d);
-        portes.get(1).setLatitude(50.633297d);
-        portes.get(1).setLongitude(3.045993d);
-        portes.get(2).setLatitude(50.634005d);
-        portes.get(2).setLongitude(3.045535d);*/
-
         Log.d("Portes", portes.toString());
 
         latitudeTextView = findViewById(R.id.latitude);
         longitudeTextView = findViewById(R.id.longitude);
-
-        test = findViewById(R.id.ButtonTest);
-        test.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //ADD CODE HERE
-
-            }
-        });
 
         distancePortesTextViews = new ArrayList<TextView>();
 
@@ -388,14 +379,18 @@ public class MainActivity extends AppCompatActivity {
         for (String perm : appPermissions){
             if (ContextCompat.checkSelfPermission(this,perm)!= PackageManager.PERMISSION_GRANTED){
                 listPermissionsNeeded.add(perm);
+                Log.d("Perms", "Perms Granted");
             }
         }
 
         if (!listPermissionsNeeded.isEmpty()){
             ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray(new String [listPermissionsNeeded.size()]),
                     PERMISSIONS_REQUEST_CODE);
+
+            Log.d("Perms", "Request Code / Return false");
             return false;
         }
+        Log.d("Perms", "return true");
         return true;
     }
 }
