@@ -1,8 +1,10 @@
 package com.example.projets8;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -90,11 +92,15 @@ public class SplashScreen extends Activity {
         timerThread.start();
     }
 
+
+
     @Override
     protected void onPause() {
         // TODO Auto-generated method stub
         super.onPause();
         finish();
     }
+
+
 
 }

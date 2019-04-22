@@ -1,10 +1,10 @@
 package com.example.projets8;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -43,11 +44,11 @@ import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -67,21 +68,29 @@ public class FaceRecon extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int RC_HANDLE_WRITE_PERM = 3;
-    SharedPreferences sharedPreferences;
+    private int bundlePorte;
+    private DatabaseReference mDatabase;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+
+        //RealTimeDatabase
+        mDatabase= FirebaseDatabase.getInstance().getReference("porte");
+        Intent i=getIntent();
+        Bundle bundle=getIntent().getExtras();
+        bundlePorte=bundle.getInt("intPorte");
+
+
+        setContentView(R.layout.activity_main);
         mStorageRef = FirebaseStorage.getInstance().getReference();
         setContentView(R.layout.activity_facerecon);
         mPreview = (CameraSurfacePreview) findViewById(R.id.preview);
         cameraOverlay = (CameraOverlay) findViewById(R.id.faceOverlay);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-
-
         if (rc == PackageManager.PERMISSION_GRANTED) {
             createCameraSource();
         } else {
@@ -95,6 +104,7 @@ public class FaceRecon extends AppCompatActivity {
             requestWritePermission();
         }
     }
+
 
     private void requestCameraPermission() {
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
@@ -285,6 +295,12 @@ public class FaceRecon extends AppCompatActivity {
         }
     }
 
+    class changeAct extends TimerTask {
+        public void run() {
+            FaceRecon.this.finish();
+        }
+    }
+
     private class GraphicFaceTracker extends Tracker<Face> {
         private CameraOverlay mOverlay;
         private FaceOverlayGraphics faceOverlayGraphics;
@@ -299,7 +315,7 @@ public class FaceRecon extends AppCompatActivity {
             Log.d("Pierre","faceDetected");
             Timer t = new Timer();
             faceRecon Task = new faceRecon();
-            t.schedule(Task, 3000L);
+            t.schedule(Task, 1500L);
         }
 
 
@@ -349,14 +365,14 @@ public class FaceRecon extends AppCompatActivity {
                 // Continue with the task to get the download URL
                 return mountainImagesRef.getDownloadUrl();
             }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
                     final String image_url = downloadUri.toString();
                     Log.d("Pierre",image_url);
-
+                    final SharedPreferences sharedPreferences;
                     sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
                     Log.d("Pierre", sharedPreferences.getString("matricule", null));
@@ -386,6 +402,9 @@ public class FaceRecon extends AppCompatActivity {
                                                     // response
                                                     Log.d("Pierre", response);
                                                     deleteImage(mountainImagesRef);
+                                                    Log.d("Pierre", response.substring(15, 22));
+                                                    float tx = Float.parseFloat(response.substring(15, 22));
+                                                    responseHandler(tx);
                                                 }
                                             },
                                             new Response.ErrorListener()
@@ -462,5 +481,42 @@ public class FaceRecon extends AppCompatActivity {
         });
     }
 
+    private void changeOuverturePorte(){
+        if(bundlePorte==0){
+            mDatabase.child("porte1").setValue(true);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
+        }
+        if(bundlePorte==1){
+            mDatabase.child("porte1").setValue(false);
+            mDatabase.child("porte2").setValue(true);
+            mDatabase.child("porte3").setValue(false);
+        }
+        if(bundlePorte==-1){
+            mDatabase.child("porte1").setValue(false);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
+        }
+    }
+
+    //Manipule le taux de confiance renvoyé par l'API
+    private void responseHandler(float tx) {
+        if (tx > 0.5) {
+            Toast.makeText(FaceRecon.this, "Bienvenue!", Toast.LENGTH_SHORT).show();
+            changeOuverturePorte();
+            Timer e = new Timer();
+            changeAct Task = new changeAct();
+            e.schedule(Task, 1500L);
+        }
+        else {
+            Toast.makeText(FaceRecon.this, "Erreur d'authentification", Toast.LENGTH_SHORT).show();
+            Timer e = new Timer();
+            changeAct Task = new changeAct();
+            e.schedule(Task, 1500L);
+        }
+    }
+
+
 
 }
+

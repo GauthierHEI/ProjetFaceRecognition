@@ -14,6 +14,7 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -32,12 +35,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    String TAG = "MonTag";
+    //Permissions
+    String[] appPermissions = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+
+    };
+    private static final int PERMISSIONS_REQUEST_CODE=1240;
+
+
+
+    Button button;
+
+    String TAG = "GPS";
     String ACTIVITY_TAG = "MainActivity";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -94,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
                 porteProche = choixPorte();
 
-                if (distanceToPortes.get(porteProche) < 20){
+                if (distanceToPortes.get(porteProche) < 2000){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
@@ -152,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
+//ON CREATE//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Toast.makeText(MainActivity.this, "Impossible de récupérer la position des portes", Toast.LENGTH_LONG).show();
                 }
-                else if( distanceToPortes.get(porteProche) < 20){
+                else if( distanceToPortes.get(porteProche) < 2000){
 
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
                     Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
@@ -344,4 +363,25 @@ public class MainActivity extends AppCompatActivity {
         return porte;
     }
 
+    private void changeAccesPorte() {
+        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference("porte").child("porte1");
+        databaseReference.setValue(true);
+        Toast.makeText(this, "Changement effectué", Toast.LENGTH_SHORT).show();
+    }
+
+    public boolean checkAncRequestPermissions(){
+        List<String> listPermissionsNeeded= new ArrayList<>();
+        for (String perm : appPermissions){
+            if (ContextCompat.checkSelfPermission(this,perm)!= PackageManager.PERMISSION_GRANTED){
+                listPermissionsNeeded.add(perm);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()){
+            ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray(new String [listPermissionsNeeded.size()]),
+                    PERMISSIONS_REQUEST_CODE);
+            return false;
+        }
+        return true;
+    }
 }
