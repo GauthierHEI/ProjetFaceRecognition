@@ -1,6 +1,7 @@
 package com.example.projets8;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,6 +40,8 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -352,63 +356,111 @@ public class FaceRecon extends AppCompatActivity {
                 // Continue with the task to get the download URL
                 return mountainImagesRef.getDownloadUrl();
             }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
                     final String image_url = downloadUri.toString();
                     Log.d("Pierre",image_url);
+                    SharedPreferences sharedPreferences;
+                    sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
-                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
-                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
-                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                            new Response.Listener<String>()
-                            {
-                                @Override
-                                public void onResponse(String response) {
-                                    // response
-                                    Log.d("Pierre", response);
-                                    deleteImage(mountainImagesRef);
+                    Log.d("Pierre", sharedPreferences.getString("matricule", null));
+
+                    String savedMatricule = sharedPreferences.getString("matricule", null);
+
+
+                    DocumentReference docRef = db.collection("Target").document(savedMatricule);
+                    docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d("Pierre", "DocumentSnapshot data: " + document.getString("visage"));
+                                    final String img_check = document.getString("visage");
+                                    Log.d("Pierre", img_check);
+
+                                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
+
+                                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
+                                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                                            new Response.Listener<String>()
+                                            {
+                                                @Override
+                                                public void onResponse(String response) {
+                                                    // response
+                                                    Log.d("Pierre", response);
+                                                    deleteImage(mountainImagesRef);
+                                                }
+                                            },
+                                            new Response.ErrorListener()
+                                            {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    // error
+                                                    Log.d("Pierre", error.toString());
+                                                    deleteImage(mountainImagesRef);
+                                                }
+                                            }
+                                    ) {
+                                        @Override
+                                        protected Map<String, String> getParams()
+                                        {
+
+                                            String savedMatricule = sharedPreferences.getString("matricule", null);
+                                            DocumentReference docRef = db.collection("Target").document(savedMatricule);
+                                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
+                                                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                                        } else {
+                                                            Log.d(TAG, "No such document");
+                                                        }
+                                                    } else {
+                                                        Log.d(TAG, "get failed with ", task.getException());
+                                                    }
+                                                }
+                                            });
+
+
+                                            Log.d("Pierre", "get Params");
+                                            Map<String, String>  params = new HashMap<>();
+                                            params.put("img_1", image_url);
+
+                                            params.put("img_2", img_check);
+                                            return params;
+                                        }
+
+                                        // Passing some request headers
+                                        @Override
+                                        public Map getHeaders() {
+                                            Log.d("Pierre", "get Header");
+                                            HashMap headers = new HashMap();
+                                            headers.put("user_id", "3cd031bea84b5097c384");
+                                            headers.put("user_key", "085fbb614106a1b414c5");
+                                            return headers;
+                                        }
+                                    };
+
+                                    postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                            30000,
+                                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                                    queue.add(postRequest);
+
+                                } else {
+                                    Log.d(TAG, "No such document");
                                 }
-                            },
-                            new Response.ErrorListener()
-                            {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    // error
-                                    Log.d("Pierre", error.getMessage());
-                                    deleteImage(mountainImagesRef);
-                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
                             }
-                    ) {
-                        @Override
-                        protected Map<String, String> getParams()
-                        {
-                            Log.d("Pierre", "get Params");
-                            Map<String, String>  params = new HashMap<>();
-                            params.put("img_1", image_url);
-                            params.put("img_2", );
-                            return params;
                         }
-
-                        // Passing some request headers
-                        @Override
-                        public Map getHeaders() {
-                            Log.d("Pierre", "get Header");
-                            HashMap headers = new HashMap();
-                            headers.put("user_id", "3cd031bea84b5097c384");
-                            headers.put("user_key", "085fbb614106a1b414c5");
-                            return headers;
-                        }
-                    };
-                    Log.d("Pierre", "prePost");
-
-                    queue.add(postRequest);
-
-                    Log.d("Pierre", "posPost");
-
-
+                    });
 
                 } else {
                     Log.d("Pierre", "Failed");
