@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,14 +41,10 @@ import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -102,23 +97,7 @@ public class FaceRecon extends AppCompatActivity {
             requestWritePermission();
         }
     }
-    private void changeOuverturePorte(){
-        if (bundlePorte==0){
-            mDatabase.child("porte1").setValue(true);
-            mDatabase.child("porte2").setValue(false);
-            mDatabase.child("porte3").setValue(false);
-        }
-        if(bundlePorte==1){
-            mDatabase.child("porte1").setValue(false);
-            mDatabase.child("porte2").setValue(true);
-            mDatabase.child("porte3").setValue(false);
-        }
-        if(bundlePorte==-1){
-            mDatabase.child("porte1").setValue(false);
-            mDatabase.child("porte2").setValue(false);
-            mDatabase.child("porte3").setValue(false);
-        }
-    }
+
 
     private void requestCameraPermission() {
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
@@ -409,7 +388,7 @@ public class FaceRecon extends AppCompatActivity {
                             Log.d("Pierre", "get Params");
                             Map<String, String>  params = new HashMap<>();
                             params.put("img_1", image_url);
-                            params.put("img_2", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7rxyUdhH_jvgUXGDcsb_KP5Si4uBHmRD5M39h2pTAiPEcB27v5w");
+                            params.put("img_2", );
                             return params;
                         }
 
@@ -437,5 +416,24 @@ public class FaceRecon extends AppCompatActivity {
             }
         });
     }
+
+    private void changeOuverturePorte(){
+        if(bundlePorte==0){
+            mDatabase.child("porte1").setValue(true);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
+        }
+        if(bundlePorte==1){
+            mDatabase.child("porte1").setValue(false);
+            mDatabase.child("porte2").setValue(true);
+            mDatabase.child("porte3").setValue(false);
+        }
+        if(bundlePorte==-1){
+            mDatabase.child("porte1").setValue(false);
+            mDatabase.child("porte2").setValue(false);
+            mDatabase.child("porte3").setValue(false);
+        }
+    }
+
 }
 

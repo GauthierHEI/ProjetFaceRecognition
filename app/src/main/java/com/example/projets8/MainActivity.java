@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     Button button;
 
     String TAG = "GPS";
-    String TAG = "MonTag";
     String ACTIVITY_TAG = "MainActivity";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
                 porteProche = choixPorte();
 
-                if (distanceToPortes.get(porteProche) < 20){
+                if (distanceToPortes.get(porteProche) < 2000){
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
