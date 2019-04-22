@@ -3,6 +3,7 @@ package com.example.projets8;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -11,22 +12,22 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import org.json.JSONArray;
 
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static android.app.PendingIntent.getActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     Button button;
 
     String TAG = "GPS";
+    String TAG = "MonTag";
+    String ACTIVITY_TAG = "MainActivity";
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference ref = db.collection("PositionsPorte");
@@ -66,19 +71,22 @@ public class MainActivity extends AppCompatActivity {
     private int nombrePortes;
     private ArrayList<Porte> portes;
     private ArrayList<Double> distanceToPortes;
-    private int porteProche;
+    private Integer porteProche = null;
 
     LocationManager locationManager = null;
     private String fournisseur;
     private TextView latitudeTextView;
     private TextView longitudeTextView;
-    private Button but;
+    Button submit;
+    Button test;
     private ArrayList<TextView> distancePortesTextViews;
+
+    SharedPreferences sharedPreferences;
 
     LocationListener ecouteurGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location localisation) {
-            Log.d(TAG,"On location changed");
+            Log.d(ACTIVITY_TAG,"On location changed");
 
             //Toast.makeText(MainActivity.this, fournisseur + " localisation", Toast.LENGTH_SHORT).show();
 
@@ -101,21 +109,26 @@ public class MainActivity extends AppCompatActivity {
             latitudeTextView.setText(strLatitude);
             longitudeTextView.setText(strLongitude);
 
-            distancesPorte(localisation);
+            if (portes.size()!=0) {
+                distancesPorte(localisation);
 
-            porteProche = choixPorte();
+                porteProche = choixPorte();
 
-            if (distanceToPortes.get(porteProche) < 20){
-                for (int i=0; i< nombrePortes; i++) {
-                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                if (distanceToPortes.get(porteProche) < 20){
+                    for (int i=0; i< nombrePortes; i++) {
+                        distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                    }
+                    distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
                 }
-                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
+                else {
+                    for (int i=0; i< nombrePortes; i++) {
+                        distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
+                    }
+                    distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
+                }
             }
             else {
-                for (int i=0; i< nombrePortes; i++) {
-                    distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
-                }
-                distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
+                Toast.makeText(MainActivity.this, "Veuillez patienter, nous récupérons votre localisation...", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -163,56 +176,37 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(this);
-
-        mAuth = FirebaseAuth.getInstance();
-
-        Query query = ref.orderBy("id",Query.Direction.DESCENDING);
-
-        Log.d("Porte", query.toString());
-
-
-        Log.d(TAG, "OnCreate");
-        if(checkAncRequestPermissions()){
-
-        }
-
-        nombrePortes = 3;
-        portes = new ArrayList<Porte>();
-        portes.add(new Porte("Porte d'entree", new Location(fournisseur)));
-        portes.add(new Porte("Porte de derriere", new Location(fournisseur)));
-        portes.add(new Porte("Salle de classe", new Location(fournisseur)));
-
-        portes.get(0).getLocation().setLatitude(50.633769d);
-        portes.get(0).getLocation().setLongitude(3.045075d);
-        portes.get(1).getLocation().setLatitude(50.633297d);
-        portes.get(1).getLocation().setLongitude(3.045993d);
-        portes.get(2).getLocation().setLatitude(50.634005d);
-        portes.get(2).getLocation().setLongitude(3.045535d);
-
         setContentView(R.layout.activity_main);
-        latitudeTextView = findViewById(R.id.latitude);
-        longitudeTextView = findViewById(R.id.longitude);
+        Log.d(ACTIVITY_TAG, "OnCreate");
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
+        final EditText editMatricule = findViewById(R.id.matricule);
+        final TextView result = findViewById(R.id.tvResult);
 
-
-        distancePortesTextViews = new ArrayList<TextView>();
-
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
-        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
-
-        distanceToPortes = new ArrayList<Double>();
-
-        but=(Button)findViewById(R.id.submit);
-        but.setOnClickListener(new View.OnClickListener() {
+        submit = (Button) findViewById(R.id.submit);
+        submit.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (distanceToPortes.get(porteProche) < 20){
+                String matricule = editMatricule.getText().toString();
+                sharedPreferences
+                        .edit()
+                        .putString("matricule", matricule)
+                        .apply();
+                Toast.makeText(MainActivity.this, "Sauvegardé !", Toast.LENGTH_SHORT).show();
+
+                String savedMatricule = sharedPreferences.getString("matricule", null);
+                editMatricule.setText(savedMatricule);
+
+                // CHANGE ACTIVITY
+                if (porteProche==null) {
                     for (int i=0; i< nombrePortes; i++) {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
+                    Toast.makeText(MainActivity.this, "Impossible de récupérer la position des portes", Toast.LENGTH_LONG).show();
+                }
+                else if( distanceToPortes.get(porteProche) < 2000){
+
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("green"));
                     Toast.makeText(MainActivity.this, "Vous êtes proche de : " + portes.get(porteProche).getName(), Toast.LENGTH_SHORT).show();
 
@@ -229,14 +223,63 @@ public class MainActivity extends AppCompatActivity {
                         distancePortesTextViews.get(i).setTextColor(Color.parseColor("black"));
                     }
                     distancePortesTextViews.get(porteProche).setTextColor(Color.parseColor("red"));
-                    Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Raprochez-vous de : "+portes.get(porteProche).getName()+", vous êtes trop loin", Toast.LENGTH_LONG).show();
                 }
             }
         });
 
+        final Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            portes = new ArrayList<Porte>();
+            portes = extras.getParcelableArrayList("listePortes");
+        }
+        else {
+            Toast.makeText(MainActivity.this, "Impossible de récupérer la position des portes", Toast.LENGTH_LONG).show();
+        }
+
+        /*portes.add(new Porte("Porte d'entree"));
+        portes.add(new Porte("Porte de derriere"));
+        portes.add(new Porte("Salle de classe"));
+
+        portes.get(0).setLatitude(50.633769d);
+        portes.get(0).setLongitude(3.045075d);
+        portes.get(1).setLatitude(50.633297d);
+        portes.get(1).setLongitude(3.045993d);
+        portes.get(2).setLatitude(50.634005d);
+        portes.get(2).setLongitude(3.045535d);*/
+
+        Log.d("Portes", portes.toString());
+
+        latitudeTextView = findViewById(R.id.latitude);
+        longitudeTextView = findViewById(R.id.longitude);
+
+        test = findViewById(R.id.ButtonTest);
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //ADD CODE HERE
+
+            }
+        });
+
+        distancePortesTextViews = new ArrayList<TextView>();
+
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteEntree));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distancePorteDerriere));
+        distancePortesTextViews.add((TextView) findViewById(R.id.distanceSalleClasse));
+
+        distanceToPortes = new ArrayList<Double>();
 
         initialiserLocalisation();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final EditText editMatricule = findViewById(R.id.matricule);
+        String savedMatricule = sharedPreferences.getString("matricule", null);
+        editMatricule.setText(savedMatricule);
 
     }
 
@@ -257,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initialiserLocalisation() {
-        Log.d(TAG, "On initialiserLocalisation");
+        Log.d(ACTIVITY_TAG, "On initialiserLocalisation");
 
         if(locationManager==null){
             locationManager = (LocationManager)
@@ -302,10 +345,13 @@ public class MainActivity extends AppCompatActivity {
 
         distanceToPortes = new ArrayList<>();
 
-        distanceToPortes.add((double) location.distanceTo(portes.get(0).getLocation()));
-        Log.d("DISTANCE", "DISTANCE "+distanceToPortes.get(0).toString());
-        distanceToPortes.add((double) location.distanceTo(portes.get(1).getLocation()));
-        distanceToPortes.add((double) location.distanceTo(portes.get(2).getLocation()));
+        for (int i =0; i<portes.size(); i++) {
+            Location locationi = new Location(fournisseur);
+            locationi.setLatitude(portes.get(i).getLocation().getLatitude());
+            locationi.setLongitude(portes.get(i).getLocation().getLongitude());
+
+            distanceToPortes.add((double) location.distanceTo(locationi));
+        }
 
         distancePortesTextViews.get(0).setText(distanceToPortes.get(0).toString());
         distancePortesTextViews.get(1).setText(distanceToPortes.get(1).toString());

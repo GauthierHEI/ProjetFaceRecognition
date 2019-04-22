@@ -3,6 +3,9 @@ package com.example.projets8;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
@@ -26,16 +29,29 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -44,6 +60,7 @@ import java.util.TimerTask;
 public class FaceRecon extends AppCompatActivity {
 
     private static final String TAG = "FaceTrackerDemo";
+    private StorageReference mStorageRef;
     private CameraSource mCameraSource = null;
     private CameraSurfacePreview mPreview;
     private CameraOverlay cameraOverlay;
@@ -67,6 +84,8 @@ public class FaceRecon extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_main);
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+        setContentView(R.layout.activity_facerecon);
         mPreview = (CameraSurfacePreview) findViewById(R.id.preview);
         cameraOverlay = (CameraOverlay) findViewById(R.id.faceOverlay);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -265,66 +284,26 @@ public class FaceRecon extends AppCompatActivity {
                 @Override
                 public void onPictureTaken(byte[] bytes) {
                     final Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        /*Log.d("Pierre", bmp.getWidth() + "x" + bmp.getHeight());
-                        try {
-                            filecon[0] = new FileOutputStream(file);
-                            bmp.compress(Bitmap.CompressFormat.JPEG, 90, filecon[0]);
+                    // Create a reference to 'temp/photo.jpg'
+                    final StorageReference mountainImagesRef = mStorageRef.child("temp/photo.jpg");
+
+                    InputStream myInputStream = new ByteArrayInputStream(bytes);
+
+                    final UploadTask uploadTask = mountainImagesRef.putStream(myInputStream);
+
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful upload
+                        }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             Log.d("Pierre","fotoCreated");
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                            Log.d("Pierre",e.getMessage());
+                            checkImages(uploadTask, mountainImagesRef);
                         }
-                        if(filecon[0] !=null) {
-                            try {
-                                filecon[0].close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Log.d("Pierre",e.getMessage());
-                            }
-                        }*/
+                    });
 
-
-                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
-                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
-                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                            new Response.Listener<String>()
-                            {
-                                @Override
-                                public void onResponse(String response) {
-                                    // response
-                                    Log.d("Pierre", response);
-                                }
-                            },
-                            new Response.ErrorListener()
-                            {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    // error
-                                    Log.d("Pierre", error.getMessage());
-                                }
-                            }
-                    ) {
-                        @Override
-                        protected Map<String, String> getParams()
-                        {
-                            Log.d("Pierre", "get Params");
-                            Map<String, String>  params = new HashMap<>();
-                            params.put("img_1", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7rxyUdhH_jvgUXGDcsb_KP5Si4uBHmRD5M39h2pTAiPEcB27v5w");
-                            params.put("img_2", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7rxyUdhH_jvgUXGDcsb_KP5Si4uBHmRD5M39h2pTAiPEcB27v5w");
-                            return params;
-                        }
-
-                        /** Passing some request headers* */
-                        @Override
-                        public Map getHeaders() {
-                            Log.d("Pierre", "get Header");
-                            HashMap headers = new HashMap();
-                            headers.put("user_id", "3cd031bea84b5097c384");
-                            headers.put("user_key", "085fbb614106a1b414c5");
-                            return headers;
-                        }
-                    };
-                    queue.add(postRequest);
                 }
             });
         }
@@ -366,5 +345,97 @@ public class FaceRecon extends AppCompatActivity {
         }
     }
 
+
+    public void deleteImage(StorageReference photoRef) {
+        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // File deleted successfully
+                Log.d(TAG, "onSuccess: deleted file");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                Log.d(TAG, "onFailure: did not delete file");
+            }
+        });
+    }
+
+    public void checkImages(UploadTask uploadTask, final StorageReference mountainImagesRef) {
+
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                // Continue with the task to get the download URL
+                return mountainImagesRef.getDownloadUrl();
+            }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    final String image_url = downloadUri.toString();
+                    Log.d("Pierre",image_url);
+
+                    RequestQueue queue = Volley.newRequestQueue(FaceRecon.this);
+                    String url = "http://www.facexapi.com/compare_faces?face_det=1";
+                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                            new Response.Listener<String>()
+                            {
+                                @Override
+                                public void onResponse(String response) {
+                                    // response
+                                    Log.d("Pierre", response);
+                                    deleteImage(mountainImagesRef);
+                                }
+                            },
+                            new Response.ErrorListener()
+                            {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    // error
+                                    Log.d("Pierre", error.getMessage());
+                                    deleteImage(mountainImagesRef);
+                                }
+                            }
+                    ) {
+                        @Override
+                        protected Map<String, String> getParams()
+                        {
+                            Log.d("Pierre", "get Params");
+                            Map<String, String>  params = new HashMap<>();
+                            params.put("img_1", image_url);
+                            params.put("img_2", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7rxyUdhH_jvgUXGDcsb_KP5Si4uBHmRD5M39h2pTAiPEcB27v5w");
+                            return params;
+                        }
+
+                        // Passing some request headers
+                        @Override
+                        public Map getHeaders() {
+                            Log.d("Pierre", "get Header");
+                            HashMap headers = new HashMap();
+                            headers.put("user_id", "3cd031bea84b5097c384");
+                            headers.put("user_key", "085fbb614106a1b414c5");
+                            return headers;
+                        }
+                    };
+                    Log.d("Pierre", "prePost");
+
+                    queue.add(postRequest);
+
+                    Log.d("Pierre", "posPost");
+
+
+
+                } else {
+                    Log.d("Pierre", "Failed");
+                }
+            }
+        });
+    }
 }
 
