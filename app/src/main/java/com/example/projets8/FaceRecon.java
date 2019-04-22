@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -42,6 +43,7 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -68,6 +70,7 @@ public class FaceRecon extends AppCompatActivity {
     private static final int RC_HANDLE_WRITE_PERM = 3;
     private int bundlePorte;
     private DatabaseReference mDatabase;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,6 +295,12 @@ public class FaceRecon extends AppCompatActivity {
         }
     }
 
+    class changeAct extends TimerTask {
+        public void run() {
+            FaceRecon.this.finish();
+        }
+    }
+
     private class GraphicFaceTracker extends Tracker<Face> {
         private CameraOverlay mOverlay;
         private FaceOverlayGraphics faceOverlayGraphics;
@@ -306,7 +315,7 @@ public class FaceRecon extends AppCompatActivity {
             Log.d("Pierre","faceDetected");
             Timer t = new Timer();
             faceRecon Task = new faceRecon();
-            t.schedule(Task, 3000L);
+            t.schedule(Task, 1500L);
         }
 
 
@@ -363,7 +372,7 @@ public class FaceRecon extends AppCompatActivity {
                     Uri downloadUri = task.getResult();
                     final String image_url = downloadUri.toString();
                     Log.d("Pierre",image_url);
-                    SharedPreferences sharedPreferences;
+                    final SharedPreferences sharedPreferences;
                     sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
                     Log.d("Pierre", sharedPreferences.getString("matricule", null));
@@ -393,6 +402,9 @@ public class FaceRecon extends AppCompatActivity {
                                                     // response
                                                     Log.d("Pierre", response);
                                                     deleteImage(mountainImagesRef);
+                                                    Log.d("Pierre", response.substring(15, 22));
+                                                    float tx = Float.parseFloat(response.substring(15, 22));
+                                                    responseHandler(tx);
                                                 }
                                             },
                                             new Response.ErrorListener()
@@ -486,6 +498,25 @@ public class FaceRecon extends AppCompatActivity {
             mDatabase.child("porte3").setValue(false);
         }
     }
+
+    //Manipule le taux de confiance renvoyé par l'API
+    private void responseHandler(float tx) {
+        if (tx > 0.5) {
+            Toast.makeText(FaceRecon.this, "Bienvenue!", Toast.LENGTH_SHORT).show();
+            changeOuverturePorte();
+            Timer e = new Timer();
+            changeAct Task = new changeAct();
+            e.schedule(Task, 1500L);
+        }
+        else {
+            Toast.makeText(FaceRecon.this, "Erreur d'authentification", Toast.LENGTH_SHORT).show();
+            Timer e = new Timer();
+            changeAct Task = new changeAct();
+            e.schedule(Task, 1500L);
+        }
+    }
+
+
 
 }
 
